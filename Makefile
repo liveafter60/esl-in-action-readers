@@ -1,20 +1,17 @@
 DIR = bin
-CMD = pdflatex -halt-on-error -output-directory=$(DIR)
+CMD_PDF = pdflatex -halt-on-error -output-directory=$(DIR)
+CMD_PNG = pdftoppm -png
 
-all: r1 r2
+all: r1 r2 r3
 
 r1:
-	mkdir -p bin
-	$(CMD) 01/cover.tex
-	$(CMD) 01/this-is-fairys-album.tex
-	$(CMD) 01/cover.tex
-	$(CMD) 01/this-is-fairys-album.tex
+	 ./build.py -d $(DIR) -i 01 -n this-is-fairys-album
+
 r2:
-	mkdir -p bin
-	$(CMD) 02/cover.tex
-	$(CMD) 02/the-old-woman-who-lived-in-a-shoe.tex
-	$(CMD) 02/cover.tex
-	$(CMD) 02/the-old-woman-who-lived-in-a-shoe.tex
+	 ./build.py -d $(DIR) -i 02 -n the-old-woman-who-lived-in-a-shoe
+
+r3:
+	./build.py -d $(DIR) -i 03 -n fairys-dream
 
 clean:
 	rm -rfv bin/*
