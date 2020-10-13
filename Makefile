@@ -16,12 +16,7 @@ r2:
 	$(CMD_PNG) $(DIR)/02/the-old-woman-who-lived-in-a-shoe.pdf $(DIR)/02/frame
 
 r3:
-	mkdir -p $(DIR)/03
-	$(CMD_PDF)/03 03/cover.tex
-	$(CMD_PDF)/03 03/fairys-dream.tex
-	$(CMD_PDF)/03 03/cover.tex
-	$(CMD_PDF)/03 03/fairys-dream.tex
-	$(CMD_PNG) $(DIR)/03/fairys-dream.pdf $(DIR)/03/frame
+	./build.py -d $(DIR) -i 03 -n fairys-dream
 
 clean:
 	rm -rfv bin/*
