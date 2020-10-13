@@ -83,6 +83,11 @@ class Build:
                     self.read_duration(j), self.odir, self.index, j)
                 os.system(cmd)
 
+            playlist.write('file logo.mp4\n')
+            cmd = 'ffmpeg -loop 1 -i img/logo.png -t 3 {}/{}/logo.mp4'.format(
+                self.odir, self.index)
+            os.system(cmd)
+
         cmd = 'ffmpeg -f concat -i {}/{}/playlist.txt' \
             ' -c copy {}/{}/tmp.mp4'.format(self.odir, self.index, self.odir,
             self.index)
@@ -90,12 +95,16 @@ class Build:
 
 
     def mix_audio(self):
-        cmd = 'ffmpeg -i {}/media/{}.mp3 -af adelay="{}|{}"' \
+        cmd = 'ffmpeg -i {}/media/{}.mp3 -af "adelay={}|{}"' \
             ' {}/{}/tmp.mp3'.format(self.index, self.name, self.read_delay(), 
             self.read_delay(), self.odir, self.index)
         os.system(cmd)
 
-        cmd = 'ffmpeg -i {}/{}/tmp.mp4 -i {}/{}/tmp.mp3 -map 0 -map 1:a' \
+        cmd = ('ffmpeg -i {}/{}/tmp.mp3 -af "apad=pad_dur=3" {}/{}/tmp2.mp3'
+            ).format(self.odir, self.index, self.odir, self.index)
+        os.system(cmd)
+
+        cmd = 'ffmpeg -i {}/{}/tmp.mp4 -i {}/{}/tmp2.mp3 -map 0 -map 1:a' \
             ' -c:v copy -shortest {}/{}/{}.mp4'.format(self.odir, self.index, 
             self.odir, self.index, self.odir, self.index, self.name)
         os.system(cmd)
