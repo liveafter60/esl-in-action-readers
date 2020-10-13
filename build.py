@@ -9,7 +9,7 @@ class Build:
     name = ''
 
 
-    def argparse(self, argv):
+    def parse_argv(self, argv):
         try:
             opts, args = getopt.getopt(argv, 'hd:n:', ['directory=', 'name='])
 
@@ -29,7 +29,7 @@ class Build:
                 self.name = arg
 
 
-    def pdflatex(self):
+    def gen_pdf(self):
         cmd_dir = 'mkdir -p bin/' + self.directory
         cmd_base = ('pdflatex -halt-on-error -output-directory=bin/{} {}/'
             ).format(self.directory, self.directory)
@@ -44,41 +44,49 @@ class Build:
         os.system(cmd_text)
 
 
-    def pdftoppm(self):
+    def gen_frames(self):
         cmd = 'pdftoppm -png bin/{}/{}.pdf bin/{}/frame'.format(self.directory,
             self.name, self.directory)
         os.system(cmd)
 
 
-    def ffmpeg(self):
-        count = len(glob.glob1('bin/' + self.directory, '*.png'))
-        cmd = 'ffmpeg -loop 1 -i bin/{}/frame-{}.png -t 5 bin/{}/frame-{}.mp4'
-        playlist = open('bin/{}/playlist.txt'.format(self.directory), 'w')
+    def gen_video(self):
+        path = 'bin/' + self.directory + '/playlist.txt'
+        with open(path, 'w') as playlist:
+            count = len(glob.glob1('bin/' + self.directory, '*.png'))
+            for x in range(count):
+                record = 'file frame-' + str(x + 1) + '.mp4\n'
+                playlist.write(record)
 
-        for x in range(count):
-            playlist.write('file frame-{}.mp4\n'.format(x + 1))
-            os.system(cmd.format(self.directory, x + 1, self.directory,
-                x + 1))
+                cmd = 'ffmpeg -loop 1 -i bin/{}/frame-{}.png' \
+                    ' -t 5 bin/{}/frame-{}.mp4'.format(self.directory, x + 1,
+                    self.directory, x + 1)
+                os.system(cmd)
 
-        playlist.close()
-        cmd = 'ffmpeg -f concat -i bin/{}/playlist.txt -c copy bin/{}/tmp.mp4'
-        os.system(cmd.format(self.directory, self.directory))
+        cmd = 'ffmpeg -f concat -i bin/{}/playlist.txt' \
+            ' -c copy bin/{}/tmp.mp4'.format(self.directory, self.directory)
+        os.system(cmd)
 
-        cmd = 'ffmpeg -i {}/vid/{}.mp3 -af adelay="10000|10000" bin/{}/tmp.mp3'
-        os.system(cmd.format(self.directory, self.name, self.directory))
 
-        cmd = ('ffmpeg -i bin/{}/tmp.mp4 -i bin/{}/tmp.mp3 -map 0 -map 1:a -c:v'
-            + ' copy -shortest bin/{}/{}.mp4')
-        os.system(cmd.format(self.directory, self.directory, self.directory,
-            self.name))
+    def mix_audio(self):
+        cmd = 'ffmpeg -i {}/vid/{}.mp3 -af adelay="10000|10000"' \
+            ' bin/{}/tmp.mp3'.format(self.directory, self.name, self.directory)
+        os.system(cmd)
+
+        cmd = 'ffmpeg -i bin/{}/tmp.mp4 -i bin/{}/tmp.mp3 -map 0 -map 1:a' \
+            ' -c:v copy -shortest bin/{}/{}.mp4'.format(self.directory,
+            self.directory, self.directory, self.name)
+        os.system(cmd)
 
 
 if __name__ == '__main__':
 
     b = Build()
 
-    b.argparse(sys.argv[1:])
-    b.pdflatex()
-    b.pdftoppm()
-    b.ffmpeg()
+    b.parse_argv(sys.argv[1:])
+    b.gen_pdf()
+    b.gen_frames()
+    b.gen_video()
+    b.mix_audio()
+    #b.ffmpeg()
 
