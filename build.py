@@ -1,13 +1,14 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 
-import os, sys, getopt, glob
+import os, sys, getopt, glob, configparser
 
 
 class Build:
     odir = ''
     index = ''
     name = ''
+    config = None
 
 
     def parse_argv(self, argv):
@@ -32,6 +33,15 @@ class Build:
 
             elif opt in ('-n', '--name'):
                 self.name = arg
+
+
+    def read_config(self):
+        self.config = configparser.ConfigParser()
+        self.config.read(self.index + '/frames.cfg')
+
+
+    def read_duration(self, frame):
+        return self.config['frames']['frame_' + str(frame)]
 
 
     def gen_pdf(self):
@@ -65,8 +75,8 @@ class Build:
                 playlist.write(record)
 
                 cmd = 'ffmpeg -loop 1 -i {}/{}/frame-{}.png' \
-                    ' -t 5 {}/{}/frame-{}.mp4'.format(self.odir, self.index, j,
-                    self.odir, self.index, j)
+                    ' -t {} {}/{}/frame-{}.mp4'.format(self.odir, self.index, j,
+                    self.read_duration(j), self.odir, self.index, j)
                 os.system(cmd)
 
         cmd = 'ffmpeg -f concat -i {}/{}/playlist.txt' \
@@ -92,6 +102,7 @@ if __name__ == '__main__':
     b = Build()
 
     b.parse_argv(sys.argv[1:])
+    b.read_config()
     b.gen_pdf()
     b.gen_frames()
     b.gen_video()
