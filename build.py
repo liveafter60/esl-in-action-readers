@@ -44,6 +44,10 @@ class Build:
         return self.config['frames']['frame_' + str(frame)]
 
 
+    def read_delay(self):
+        return int(self.config['frames']['delay']) * 1000
+
+
     def gen_pdf(self):
         cmd_dir = 'mkdir -p {}/{}'.format(self.odir, self.index)
         cmd_base = ('pdflatex -halt-on-error -output-directory={}/{} {}/'
@@ -86,9 +90,9 @@ class Build:
 
 
     def mix_audio(self):
-        cmd = 'ffmpeg -i {}/vid/{}.mp3 -af adelay="10000|10000"' \
-            ' {}/{}/tmp.mp3'.format(self.index, self.name, self.odir, 
-            self.index)
+        cmd = 'ffmpeg -i {}/vid/{}.mp3 -af adelay="{}|{}"' \
+            ' {}/{}/tmp.mp3'.format(self.index, self.name, self.read_delay(), 
+            self.read_delay(), self.odir, self.index)
         os.system(cmd)
 
         cmd = 'ffmpeg -i {}/{}/tmp.mp4 -i {}/{}/tmp.mp3 -map 0 -map 1:a' \
@@ -107,5 +111,4 @@ if __name__ == '__main__':
     b.gen_frames()
     b.gen_video()
     b.mix_audio()
-    #b.ffmpeg()
 
