@@ -90,7 +90,7 @@ class Build:
 
 
     def mix_audio(self):
-        cmd = 'ffmpeg -i {}/vid/{}.mp3 -af adelay="{}|{}"' \
+        cmd = 'ffmpeg -i {}/media/{}.mp3 -af adelay="{}|{}"' \
             ' {}/{}/tmp.mp3'.format(self.index, self.name, self.read_delay(), 
             self.read_delay(), self.odir, self.index)
         os.system(cmd)
