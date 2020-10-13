@@ -5,34 +5,39 @@ import os, sys, getopt, glob
 
 
 class Build:
-    directory = ''
+    odir = ''
+    index = ''
     name = ''
 
 
     def parse_argv(self, argv):
         try:
-            opts, args = getopt.getopt(argv, 'hd:n:', ['directory=', 'name='])
+            opts, args = getopt.getopt(argv, 'hd:i:n:', ['directory=', 'index=',
+                'name='])
 
         except:
-            print('./build.py -d <directory> -n <name>')
+            print('./build.py -d <output-directory> -i <index> -n <name>')
             sys.exit(2)
 
         for opt, arg in opts:
             if opt == '-h':
-                print('./build.py -d <directory> -n <name>')
+                print('./build.py -d <output-directory> -i <index> -n <name>')
                 sys.exit()
-
+            
             elif opt in ('-d', '--directory'):
-                self.directory = arg
+                self.odir = arg
+
+            elif opt in ('-i', '--index'):
+                self.index = arg
 
             elif opt in ('-n', '--name'):
                 self.name = arg
 
 
     def gen_pdf(self):
-        cmd_dir = 'mkdir -p bin/' + self.directory
-        cmd_base = ('pdflatex -halt-on-error -output-directory=bin/{} {}/'
-            ).format(self.directory, self.directory)
+        cmd_dir = 'mkdir -p {}/{}'.format(self.odir, self.index)
+        cmd_base = ('pdflatex -halt-on-error -output-directory={}/{} {}/'
+            ).format(self.odir, self.index, self.index)
 
         cmd_cover = cmd_base + 'cover.tex'
         cmd_text = cmd_base + self.name
@@ -45,37 +50,40 @@ class Build:
 
 
     def gen_frames(self):
-        cmd = 'pdftoppm -png bin/{}/{}.pdf bin/{}/frame'.format(self.directory,
-            self.name, self.directory)
+        cmd = 'pdftoppm -png {}/{}/{}.pdf {}/{}/frame'.format(self.odir, 
+            self.index, self.name, self.odir, self.index)
         os.system(cmd)
 
 
     def gen_video(self):
-        path = 'bin/' + self.directory + '/playlist.txt'
+        path = '{}/{}/playlist.txt'.format(self.odir, self.index)
         with open(path, 'w') as playlist:
-            count = len(glob.glob1('bin/' + self.directory, '*.png'))
-            for x in range(count):
-                record = 'file frame-' + str(x + 1) + '.mp4\n'
+            count = len(glob.glob1(self.odir + '/' + self.index, '*.png'))
+            for i in range(count):
+                j = i + 1
+                record = 'file frame-' + str(j) + '.mp4\n'
                 playlist.write(record)
 
-                cmd = 'ffmpeg -loop 1 -i bin/{}/frame-{}.png' \
-                    ' -t 5 bin/{}/frame-{}.mp4'.format(self.directory, x + 1,
-                    self.directory, x + 1)
+                cmd = 'ffmpeg -loop 1 -i {}/{}/frame-{}.png' \
+                    ' -t 5 {}/{}/frame-{}.mp4'.format(self.odir, self.index, j,
+                    self.odir, self.index, j)
                 os.system(cmd)
 
-        cmd = 'ffmpeg -f concat -i bin/{}/playlist.txt' \
-            ' -c copy bin/{}/tmp.mp4'.format(self.directory, self.directory)
+        cmd = 'ffmpeg -f concat -i {}/{}/playlist.txt' \
+            ' -c copy {}/{}/tmp.mp4'.format(self.odir, self.index, self.odir,
+            self.index)
         os.system(cmd)
 
 
     def mix_audio(self):
         cmd = 'ffmpeg -i {}/vid/{}.mp3 -af adelay="10000|10000"' \
-            ' bin/{}/tmp.mp3'.format(self.directory, self.name, self.directory)
+            ' {}/{}/tmp.mp3'.format(self.index, self.name, self.odir, 
+            self.index)
         os.system(cmd)
 
-        cmd = 'ffmpeg -i bin/{}/tmp.mp4 -i bin/{}/tmp.mp3 -map 0 -map 1:a' \
-            ' -c:v copy -shortest bin/{}/{}.mp4'.format(self.directory,
-            self.directory, self.directory, self.name)
+        cmd = 'ffmpeg -i {}/{}/tmp.mp4 -i {}/{}/tmp.mp3 -map 0 -map 1:a' \
+            ' -c:v copy -shortest {}/{}/{}.mp4'.format(self.odir, self.index, 
+            self.odir, self.index, self.odir, self.index, self.name)
         os.system(cmd)
 
 

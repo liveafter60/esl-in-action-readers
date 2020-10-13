@@ -5,7 +5,7 @@ CMD_PNG = pdftoppm -png
 all: r1 r2 r3
 
 r1:
-	 ./build.py -d 01 -n this-is-fairys-album
+	 ./build.py -d $(DIR) -i 01 -n this-is-fairys-album
 
 r2:
 	mkdir -p $(DIR)/02
