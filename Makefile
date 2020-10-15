@@ -13,6 +13,9 @@ r2:
 r3:
 	./build.py -d $(DIR) -i 03 -n fairys-dream
 
+r4:
+	./build.py -d $(DIR) -i 04 -n peace-and-war
+
 clean:
 	rm -rfv bin/*
 
