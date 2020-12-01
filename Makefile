@@ -16,6 +16,9 @@ r3:
 r4:
 	./build.py -d $(DIR) -i 04 -n peace-and-war
 
+r5:
+	./build.py -d $(DIR) -i 05 -n the-highwayman
+
 clean:
 	rm -rfv bin/*
 
