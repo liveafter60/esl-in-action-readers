@@ -19,6 +19,9 @@ r4:
 r5:
 	./build.py -d $(DIR) -i 05 -n the-highwayman
 
+r6:
+	./build.py -d $(DIR) -i 06 -n the-tyger
+
 clean:
 	rm -rfv bin/*
 
