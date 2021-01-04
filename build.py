@@ -75,12 +75,25 @@ class Build:
             count = len(glob.glob1(self.odir + '/' + self.index, '*.png'))
             for i in range(count):
                 j = i + 1
-                record = 'file frame-' + str(j) + '.mp4\n'
+                
+                if count < 9:
+                    record = 'file frame-' + str(j) + '.mp4\n'
+                else:
+                    record = 'file frame-' + str(j).zfill(2) + '.mp4\n'
+                
                 playlist.write(record)
 
-                cmd = 'ffmpeg -loop 1 -i {}/{}/frame-{}.png' \
-                    ' -t {} {}/{}/frame-{}.mp4'.format(self.odir, self.index, j,
-                    self.read_duration(j), self.odir, self.index, j)
+                if count < 9:
+                    cmd = 'ffmpeg -loop 1 -i {}/{}/frame-{}.png' \
+                        ' -t {} {}/{}/frame-{}.mp4'.format(self.odir,
+                        self.index, j, self.read_duration(j), self.odir,
+                        self.index, j)
+                else:
+                    cmd = 'ffmpeg -loop 1 -i {}/{}/frame-{}.png' \
+                        ' -t {} {}/{}/frame-{}.mp4'.format(self.odir,
+                        self.index, str(j).zfill(2), self.read_duration(j),
+                        self.odir, self.index, str(j).zfill(2))
+
                 os.system(cmd)
 
             playlist.write('file logo.mp4\n')
